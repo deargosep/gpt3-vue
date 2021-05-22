@@ -14,4 +14,10 @@
 </template>
 
 <style>
+
+@media (min-width: 1400px) {
+  .container{
+  width: 60vw;
+}
+}
 </style>
