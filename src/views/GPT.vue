@@ -1,23 +1,22 @@
 <template>
-    <div>
+  <div>
     <v-alert type="error" v-show="error">{{ chatError }}</v-alert>
     <v-card>
-      <v-list class="chat-box" v-chat-scroll="{smooth: true}">
+      <v-list class="chat-box" v-chat-scroll="{ smooth: true }">
         <v-list-item
-          v-bind:key="message.text"
-          v-for="message in messages"
+          v-bind:key="idx"
+          v-for="(message, idx) in messages"
           v-bind:class="checkMsg(message.request)"
-          class="message white--text"
+          class="message "
         >
           {{ message.text }}
-          {{message}}
         </v-list-item>
       </v-list>
 
       <v-card-title class="justify-center" v-show="messages.length === 0">
         New messages will appear here!
       </v-card-title>
-      <v-container v-show="messages.length > 0">
+      <div v-show="messages.length > 0">
         <v-card-title
           v-show="loading === true && error === true"
           class="justify-center"
@@ -38,7 +37,7 @@
             <v-icon> mdi-refresh </v-icon>
           </v-btn>
         </v-card-title>
-      </v-container>
+      </div>
     </v-card>
     <v-form
       lazy-validation
@@ -63,21 +62,18 @@
         Отправить
       </v-btn>
     </v-form>
-    <v-btn block @click="clearStorage"
-    >
-    Очистить
-    </v-btn>
+    <v-btn block @click="clearStorage"> Очистить </v-btn>
   </div>
-  </template>
+</template>
 
 <script>
-import  axios from 'axios'
-  export default {
-      props: {
-        roomId:undefined
-      },
-      name: 'GPT',
-      data: () => ({
+import axios from "axios";
+export default {
+  props: {
+    roomId: undefined,
+  },
+  name: "GPT",
+  data: () => ({
     loading: false,
     error: false,
     request: {
@@ -99,10 +95,10 @@ import  axios from 'axios'
     }
   },
   methods: {
-      clearStorage() {
-          this.messages = []
-          localStorage.clear()
-      },
+    clearStorage() {
+      this.messages = [];
+      localStorage.clear();
+    },
     clear() {
       this.loading = false;
       this.error = false;
@@ -126,25 +122,51 @@ import  axios from 'axios'
         } else {
           this.request.text = "";
           this.messages.push({ text: request, request: true });
+          //sber
           await axios
             .post(
-              "https://api.aicloud.sbercloud.ru/public/v1/public_inference/gpt3/predict",
+              atob(
+                "ICAgICAgaHR0cHM6Ly9hcGkuYWljbG91ZC5zYmVyY2xvdWQucnUvcHVibGljL3YxL3B1YmxpY19pbmZlcmVuY2UvZ3B0My9wcmVkaWN0"
+              ),
               {
                 text: request,
               }
             )
             .then(function (response) {
               scope.messages.push({
-                text: response.predictions,
+                text: response.data.predictions,
                 request: false,
               });
-              console.log(response)
+              console.log(response);
               localStorage.setItem("messages", JSON.stringify(scope.messages));
-              scope.loading = false;
             })
-            .catch(function (error) {
-              scope.chatError = error;
-              scope.error = true;
+            .catch(async function (error) {
+              await axios
+                .post(
+                  atob("aHR0cHM6Ly9wZWxldmluLmdwdC5kb2Jyby5haS9nZW5lcmF0ZS8="),
+                  {
+                    prompt: request,
+                    length: 80,
+                  }
+                )
+                .then(function (response) {
+                  const replies = response.data.replies;
+                  scope.messages.push({
+                    text: replies[Math.floor(Math.random() * replies.length)],
+                    request: false,
+                  });
+                  console.log(response);
+                  localStorage.setItem(
+                    "messages",
+                    JSON.stringify(scope.messages)
+                  );
+                })
+                .catch(function (error) {
+                  scope.chatError = error;
+                  scope.error = true;
+                });
+            })
+            .finally(function (response) {
               scope.loading = false;
             });
         }
@@ -153,8 +175,8 @@ import  axios from 'axios'
       }
     },
   },
-  }
-  </script>
+};
+</script>
   
   <style>
 .chat-box {
@@ -169,9 +191,12 @@ import  axios from 'axios'
   margin: 5px;
   font-size: 14px;
   /* background-color: ; */
+  overflow-y: auto;
+word-wrap: break-word;
 }
 .message-right {
   position: relative;
   margin-left: 30%;
+  float: right;
 }
 </style>
