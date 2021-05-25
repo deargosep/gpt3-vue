@@ -192,7 +192,7 @@ export default {
   font-size: 14px;
   /* background-color: ; */
   overflow-y: auto;
-word-wrap: break-word;
+word-wrap: anywhere;
 }
 .message-right {
   position: relative;
