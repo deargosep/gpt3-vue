@@ -68,6 +68,7 @@
 
 <script>
 import axios from "axios";
+import OpenAI from "openai-api";
 export default {
   props: {
     roomId: undefined,
@@ -122,25 +123,46 @@ export default {
         } else {
           this.request.text = "";
           this.messages.push({ text: request, request: true });
-          //sber
-          await axios
+          //OpenAI
+          const openaiKey =
+            "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";
+          // const openai = new OpenAI(openaiKey);
+          console.log(openaiKey);
+          axios
             .post(
-              atob(
-                "ICAgICAgaHR0cHM6Ly9hcGkuYWljbG91ZC5zYmVyY2xvdWQucnUvcHVibGljL3YxL3B1YmxpY19pbmZlcmVuY2UvZ3B0My9wcmVkaWN0"
-              ),
+              "https://api.openai.com/v1/engines/text-davinci-002/completions",
               {
-                text: request,
+                prompt: request,
+              },
+              {
+                headers: {
+                  "Content-Type": "application/json",
+                  Authorization: `Bearer ${openaiKey}`,
+                },
               }
             )
-            .then(function (response) {
+            // openai
+            //   .complete({
+            //     engine: "curie:ft-tango-2021-08-21-23-57-42",
+            //     prompt: request,
+            //     maxTokens: 64,
+            //     temperature: 0,
+            //     topP: 1,
+            //     presencePenalty: 0,
+            //     frequencyPenalty: 0,
+            //     bestOf: 1,
+            //     n: 1,
+            //     stop: ["input:"],
+            //   })
+            .then(function(response) {
+              console.log(response);
               scope.messages.push({
-                text: response.data.predictions,
+                text: response.data.choices[0].text,
                 request: false,
               });
-              console.log(response);
               localStorage.setItem("messages", JSON.stringify(scope.messages));
             })
-            .catch(async function (error) {
+            .catch(async function(error) {
               await axios
                 .post(
                   atob("aHR0cHM6Ly9wZWxldmluLmdwdC5kb2Jyby5haS9nZW5lcmF0ZS8="),
@@ -149,7 +171,7 @@ export default {
                     length: 80,
                   }
                 )
-                .then(function (response) {
+                .then(function(response) {
                   const replies = response.data.replies;
                   scope.messages.push({
                     text: replies[Math.floor(Math.random() * replies.length)],
@@ -161,12 +183,12 @@ export default {
                     JSON.stringify(scope.messages)
                   );
                 })
-                .catch(function (error) {
+                .catch(function(error) {
                   scope.chatError = error;
                   scope.error = true;
                 });
             })
-            .finally(function (response) {
+            .finally(function(response) {
               scope.loading = false;
             });
         }
@@ -177,8 +199,8 @@ export default {
   },
 };
 </script>
-  
-  <style>
+
+<style>
 .chat-box {
   max-height: 70vh !important;
   overflow-y: auto;
@@ -192,7 +214,7 @@ export default {
   font-size: 14px;
   /* background-color: ; */
   overflow-y: auto;
-word-wrap: anywhere;
+  word-wrap: anywhere;
 }
 .message-right {
   position: relative;

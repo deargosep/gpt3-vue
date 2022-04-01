@@ -9,6 +9,7 @@
   "dependencies": {
     "axios": "^0.21.1",
     "core-js": "^3.6.5",
+    "openai-api": "^1.2.6",
     "register-service-worker": "^1.7.1",
     "vue": "^2.6.11",
     "vue-chat-scroll": "^1.4.0",
